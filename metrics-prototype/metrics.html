@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#4C33E4">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Метрики рефинансирования · Кредистория</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="metrics.css">
+</head>
+<body>
+  <!-- Экран входа по паролю. Пароль проверяется по SHA-256 из auth.js -->
+  <div class="gate" id="gate">
+    <form class="gate__card" id="gateForm" autocomplete="off" novalidate>
+      <div class="logo gate__logo">
+        <span class="logo__mark" aria-hidden="true">К</span>
+        <span class="logo__text">Кредистория</span>
+      </div>
+      <h1 class="gate__title">Вход в прототип</h1>
+      <p class="gate__sub">Внутренний дашборд метрик рефинансирования. Введите пароль, который вам передали.</p>
+      <label class="gate__label" for="gatePass">Пароль</label>
+      <div class="gate__field">
+        <input type="password" id="gatePass" name="password" autocomplete="current-password" required>
+        <button type="button" class="gate__eye" id="gateEye" aria-label="Показать пароль">Показать</button>
+      </div>
+      <p class="gate__error" id="gateError" role="alert" hidden></p>
+      <label class="consent gate__remember"><input type="checkbox" id="gateRemember"> <span>Запомнить на этом устройстве на 7 дней</span></label>
+      <button class="btn btn--primary btn--lg btn--block" type="submit" id="gateSubmit">Войти</button>
+      <p class="gate__fine">Прототип с демо-данными. Реальных персональных данных здесь нет.</p>
+    </form>
+  </div>
+
+  <div id="app" hidden>
+
+  <div class="demo-bar">
+    <div class="container demo-bar__in">
+      <span class="demo-bar__label">Демо · метрики платформы · данные условные</span>
+      <a class="link-btn" href="index.html">Кабинет клиента →</a>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="container header__in">
+      <a class="logo" href="#" aria-label="Кредистория">
+        <span class="logo__mark" aria-hidden="true">К</span>
+        <span class="logo__text">Кредистория</span>
+      </a>
+      <nav class="header__nav" aria-label="Бэк-офис">
+        <a href="#" class="is-active">Метрики рефинансирования</a>
+        <a href="#registry">Реестр расчётов</a>
+      </nav>
+      <button class="avatar" type="button" data-logout title="Выйти">
+        <span class="avatar__circle" id="whoMark">ОКБ</span>
+        <span class="avatar__name" id="whoName">Продукт · выйти</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Панель фильтров: в одну строку над всеми графиками -->
+  <div class="filters">
+    <div class="container filters__in">
+      <div class="seg seg--sm" role="radiogroup" aria-label="Период" id="fPeriod">
+        <button type="button" role="radio" class="seg__btn" data-v="7">7 дней</button>
+        <button type="button" role="radio" class="seg__btn is-active" data-v="30" aria-checked="true">30 дней</button>
+        <button type="button" role="radio" class="seg__btn" data-v="90">Квартал</button>
+      </div>
+      <div class="seg seg--sm" role="radiogroup" aria-label="Режим" id="fMode">
+        <button type="button" role="radio" class="seg__btn is-active" data-v="api" aria-checked="true">Онлайн по API</button>
+        <button type="button" role="radio" class="seg__btn" data-v="pilot">Пилот на реестрах</button>
+      </div>
+      <label class="fsel"><span>Вид</span>
+        <select id="fView">
+          <option value="okb">ОКБ: все партнёры</option>
+          <option value="sovcom">ЛК партнёра: Совкомбанк</option>
+          <option value="sber">ЛК партнёра: СберБанк</option>
+        </select>
+      </label>
+      <span class="filters__asof" id="asOf"></span>
+    </div>
+  </div>
+
+  <nav class="subnav subnav--m" aria-label="Разделы">
+    <div class="container subnav__in">
+      <a href="#overview" class="is-active">Главное</a>
+      <a href="#funnel">Воронка</a>
+      <a href="#partners">Партнёры</a>
+      <a href="#registry">Реестр расчётов</a>
+      <a href="#attr">Атрибуция</a>
+      <a href="#quality">Качество</a>
+    </div>
+  </nav>
+
+  <main class="container main mx">
+    <section id="overview" aria-labelledby="ovTitle">
+      <div class="mx-head">
+        <div>
+          <p class="save__eyebrow" id="ovEyebrow"></p>
+          <h1 class="mx-title" id="ovTitle">Метрики рефинансирования</h1>
+        </div>
+        <p class="mx-note" id="ovNote"></p>
+      </div>
+      <div class="kpi-row" id="kpis"></div>
+      <div class="mx-grid">
+        <article class="card mx-card">
+          <header class="mx-card__head"><h2 class="h3" id="trendTitle">Переходы и подтверждённые выдачи</h2><span class="legend" id="trendLegend"></span></header>
+          <div class="chart" id="trend"></div>
+        </article>
+        <article class="card mx-card" id="valueCard">
+          <header class="mx-card__head"><h2 class="h3">Ценность для клиента</h2></header>
+          <div id="value"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="funnel" aria-labelledby="fnTitle">
+      <div class="section__head"><h2 id="fnTitle" class="h2">Воронка</h2><span class="muted" id="fnHint"></span></div>
+      <div class="card mx-card"><div id="funnelChart"></div></div>
+    </section>
+
+    <section class="section" id="partners" aria-labelledby="ptTitle">
+      <div class="section__head"><h2 id="ptTitle" class="h2">Партнёры</h2><span class="muted" id="ptHint"></span></div>
+      <div class="card table-wrap"><table class="mx-table" id="ptTable"></table></div>
+    </section>
+
+    <section class="section" id="registry" aria-labelledby="rgTitle">
+      <div class="section__head"><h2 id="rgTitle" class="h2">Реестр расчётов с партнёрами</h2>
+        <div class="rg-actions"><label class="fsel"><span>Партнёр</span><select id="rgPartner"></select></label>
+        <button class="btn btn--secondary" type="button" id="rgExport">Выгрузить CSV</button></div>
+      </div>
+      <div class="kpi-row kpi-row--sm" id="rgKpis"></div>
+      <div class="card table-wrap"><table class="mx-table mx-table--rg" id="rgTable"></table></div>
+      <p class="note" id="rgNote"></p>
+    </section>
+
+    <section class="section" id="attr" aria-labelledby="atTitle">
+      <div class="section__head"><h2 id="atTitle" class="h2">Атрибуция и обход лидогенерации</h2></div>
+      <div class="mx-grid mx-grid--3" id="attrGrid"></div>
+    </section>
+
+    <section class="section" id="quality" aria-labelledby="qTitle">
+      <div class="section__head"><h2 id="qTitle" class="h2">Качество и поддержка</h2></div>
+      <div class="mx-grid" id="qualityGrid"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__in">
+      <span>Источник в продукте: DWH, витрины refi_funnel, refi_partner_day, refi_leads, refi_survey. Обновление — раз в час.</span>
+      <span>© 2026 АО «ОКБ» · Кредистория</span>
+    </div>
+  </footer>
+  <div class="tip-pop" id="tip" role="status" hidden></div>
+  </div><!-- /#app -->
+
+  <script src="metrics-data.js"></script>
+  <script src="metrics.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>
